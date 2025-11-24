@@ -1,0 +1,777 @@
+
+ Go to functions.php for the further part of the notes 
+ 
+ MOST COMMON FUNCTIONS
+
+ wp_head()
+ - This function is mandatory
+ - Should be located before the closing </head> tag
+ - Stylesheets & scripts from the theme and any plugins that might be used
+
+wp_title()
+- This function is mandatory for seo
+- The <title> tag is the most common place to find the function
+- Creates a title for the browser based on the current page being viewed
+
+wp_footer()
+- This function is mandatory
+- Should be located before the closing </body> tag
+- Ensures proper loading of JavaScript files
+
+dynamic_sidebar()
+- Not mandatory
+- Output the content of a specific dynamic sidebar or widget area
+- Used within a loop to display widgets dynamically
+
+Main files on your website
+- header.php
+- footer.php
+- sidebar.php
+
+other files
+- comments.php
+- searchform.php
+
+other base files
+- page.php -> display pages
+- single.php -> display post
+- attachment.php -> attach images
+- archive.php -> accessing info
+
+special files
+- home.php
+- front-page.php
+- search.php
+- 404.php
+
+Important functions
+get_header()
+get_footer()
+get_sidebar()
+get_search_form()
+comments_template()
+
+* these functions can have parameters to get the specific sidebar or comment etc. What you just need to do is create a file starting with the default name of file then dash and your prefered name. ex. sidebar-secondary.php. To get this just use get_sidebar("secondary").
+
+----- FUNCTIONS FILE FUNDAMENTALS -----
+-> functions.php  
+
+KEY ASPECTS
+Core Functions
+- PHP Functions
+- Features control
+- Website Behavior
+
+Theme Setup
+- Setup initiation
+- Essential config
+- Theme capabilities
+
+Actions and Filters
+- Event-driven architecture
+- Behavior altering
+- Custom content
+
+Custom Functions
+- Custom Functions house
+- Complex features
+- Website Behavior
+
+Styles and Scripts 
+- Enqueueing process
+- Efficient loading
+- Theme Structure
+
+Child Themes 
+- Best practice
+- Functionality override
+- Functionality extension
+
+------- Actions AND Filters -----
+
+Hooks - Modify or extend the default behavior of the system
+ex. Actions, Filters
+
+A hook in WordPress is a point in the code where developers can attach their custom functions to modify or extend the default behavior of the system.
+
+ACTIONS
+What? - Events, Custom Code Execution, No returned value
+How? - add_action(), Lifecycle trigger events, Sequence execution
+Why? - Code extensible, Modular flexibility, Future-Proofing
+
+In WordPress, an ACTION is an event or a point in the execution of a program where you can hook in and execute your custom code. An ACTION is essentially an event hook that signals a specific point in the execution flow of the application.
+
+add_action("hook_name", "your_function_name");
+
+FILTERS
+What? - Hooks or Functions, Data Modification, Content Refinement
+How? - add_filter(), Values interception, Chaining Support
+Why? - Code extensible, Behavior altering, Dynamic Adaptability
+
+------  Actions in WordPress
+
+Definition:
+Actions are "events" that WordPress fires at specific points. You attach your function to those events so it runs when that moment happens.
+👉 You don’t return anything — your function just does something (e.g., echo content, save data, send email, enqueue scripts, etc.).
+✅ Example: Adding code in the <head> section
+
+// Function to run at wp_head action
+function my_custom_meta() {
+    echo '<meta name="author" content="Jerremy">';
+}
+// Hook into WordPress head section
+add_action('wp_head', 'my_custom_meta');
+
+➡️ Output: When WordPress reaches wp_head, your <meta> tag gets printed inside <head>.
+
+-----  Filters in WordPress
+Definition:
+Filters let you modify data before WordPress uses it. They take data in, your function changes it, then return it back.
+👉 You must return a value (modified or not), otherwise the data is lost.
+✅ Example: Modifying post titles
+
+// Function to modify post title
+function add_prefix_to_title($title) {
+    return '🔥 ' . $title;
+}
+// Hook into 'the_title' filter
+add_filter('the_title', 'add_prefix_to_title');
+
+➡️ Result: Every post title will now have a 🔥 prefix.
+* Whenever the_title is used, add_prefix_to_title is called before executing the_title
+
+✅ In short:
+Actions = “Do something” at a certain point.
+Filters = “Change something” before WordPress uses it.
+
+
+*For custom files, its only applicable to pages and not posts
+
+--------------------- Theme Folder Structure ---------------------
+root -> here you see common php files
+
+Folders
+assets -> images, videos
+upload folder in wp-content -> here you see assets being uploaded via wordpress
+js -> 
+css -> 
+inc -> include folder, php files for other functionalities
+scss -> 
+
+----------- Loading CSS Styles to any Theme ------------
+functions ( we need to register the files first then enqueue )
+- wp_register_style()
+- wp_enqueue_style()
+- wp_register_script()
+- wp_enqueue_script()
+
+*The register functions inform WordPress about the availability of a style sheet or script, and assign a unique handle to it.This lets WordPress know about the file, but it doesn't automatically include it on the page. The enqueue functions are responsible for adding the registered style sheet or script to the page when it is rendered. These functions ensure that the style or script is included either in the page's header via wp_head() function or footer via wp_footer() function, depending on where the file is needed.
+
+- wp_register_style( string $handle/$name_of_stylesheet, string|false $source, string[] $dependencies = array(), string|bool|null $version = false, string $media = "all" ): bool -> means it returns boolean
+* instead of defining a media type like you would define for styles $media = "all", you use a boolean value to indicate whether the script should be loaded in the footer or the header, with true for the footer, false for the header, and the default being false.
+
+
+---------- Unleashing WP_QUERY --------------
+The use of WP_Query
+Posts -> The primary use of WP_Query is to retrieve posts from the database
+Other content -> Query other content types like pages, custom posts types, attachments etc.
+
+Key Features
+- WP_Query class doesn't directly handle database requests. Instead, it serves as a primary interface through which you provide query parameters. This allows WordPress to manage the database interactions while offering a straightforward way to retrieve content.
+
+Other Key Features
+- Great for debugging
+- Using modularity
+- Security with MYSQL requests
+
+
+---------- Display the Right Content --------------
+1. URL Parsing
+*First of all, imagine in this scenario when a user requests a page on a WordPress site, the URL is parsed to identify the requested content, including the post type, category, tag, author, and other parameters. 
+
+2. Query Variables
+*Then WordPress extracts information from the parsed URL to set up query variables. These variables include page name, post type, category, name, tag, author, and others.
+
+3. Template Heirarchy
+*Next, WordPress follows the template hierarchy, a predefined sequence of template files that helps determine which template to use for rendering the requested content.
+
+4.  Template File Selection
+*Then, WordPress looks for template files in the active theme based on the information gathered from the URL and query variables the hierarchy includes PHP files like front page, home, single page, category, and others. The most specific template file in the hierarchy takes precedence, as we learned, for example, If single.php and page.php both exist. WordPress will use single.php for display in a single post. If a specific template file is not found, WordPress falls back to less specific templates until it reaches index.php, which is the default fallback template.
+
+5. Theme File Execution
+*Now, once the appropriate template file is determined, WordPress executes the PHP code within that file to generate the HTML content for the page.
+
+6. The Loop
+*Then the central mechanism for retrieving and displaying content is the WordPress loop that we learned in the previous lecture. The loop iterates through the posts retrieved by the current query, displaying them according to the chosen template in addition to the main query.
+
+7. Custom Queries
+*Developers can use custom queries, often utilizing WP_Query to retrieve specific sets of content for custom loops or sections of the page, then throw out the template files.
+
+8. Theme Functions
+*Themes may include various components, functions, and template tags.
+Example, get_header(), get_sidebar(), and get_footer() to structure and modularize the code.
+
+9. HTML Output
+*Finally, the PHP code within the chosen template file generates HTML output, which is sent to the user's browser for rendering.
+
+------------ Decoding The Loop ---------------
+The Loop
+1. have_posts() -> display available posts
+2. the_posts() -> retrieve data of the current post
+
+Do you need to "Loop" Every Time? 
+No, call the_post() method if you have one page that returns one post only
+Only used ocasionally, its rare to have fixed one post
+
+------------ Crafting Custom and Dynamic Content with Queries -----------------
+Custom Queries
+
+Different ways
+1. WP_Query() instance
+-> Create a secondary, custom query on a page template
+-> Doesn't alter the main query
+-> Isolates the custom query within a template
+
+$args = array(
+    'post_status' => 'publish',
+    'posts_per_page' => 5,
+);
+$query = new WP_Query($args); // Creates a new, custom query object, separate from the main query.
+
+if ($query->have_posts()) {
+    while ($query->have_posts()) {
+        $query->the_post();
+        // Display post content or perform other actions
+        echo "<h1>" . get_the_title() . "</h1>";
+    }
+    wp_reset_postdata(); // Reset post data after the custom query, not applicable for the other versions
+}
+
+2. query_posts() 
+-> Edits the main query on the page template
+-> Not recommended, affects subsequent loops, overrides the main query
+
+$string = "posts_status=publish&post_per_page=5&order=ASC";
+query_posts($string);
+
+if ($query->have_posts()) {
+    while ($query->have_posts()) {
+        $query->the_post();
+        // Display post content or perform other actions
+        echo "<h1>" . get_the_title() . "</h1>";
+    }
+    wp_reset_postdata(); // Reset post data after the custom query
+}
+
+3. get_posts()
+-> Custom loop separate from the main query
+-> Returns an array of post objects
+-> Doesn't alter the main query
+
+$new_posts = get_posts($args);
+foreach ($new_posts as $post) :
+    echo '<h1>' . $post->post_title . '</h1>';
+endforeach;
+
+--------- Advanced Queries -------------
+Advanced Query 1
+$args = array(
+    'post_type' => 'post',
+    'cat' => 'main_posts',
+    'order_by' => 'title',
+    'order' => 'desc',
+);
+$new_query = new WP_Query($args);
+
+Advanced Query 2
+$args = array(
+    'post_type' => 'post',
+    'cat' => 'main_posts',
+    'order_by' => 'title',
+    'category_and' => array('main_posts', 'secondary_post'),
+);
+$new_query = new WP_Query($args);
+--------- Exploring Properties and Global Variables -----------
+
+Most Useful Properties
+1. $query -> The query string passed to the query object.
+2. $query_vars -> An associative array of the full list of query vars and values.
+3. $posts -> Holds the requested posts from your current query. Usually accessed via the loop.
+4. $post_count -> Holds the number of posts being displayed. Good for paginated pages.
+5. $found_posts -> Posts which indicate the total number of posts returned by the query, excluding any pagination limits.
+6. $max_num_pages -> Number of pages based on the number of found posts. Number of pages based on the pagination limit.
+
+Global Variables -> global variables, also known as globals. To use a global variable within a template, you need to declare it with the global keyword. This ensures that the variable refers to the global data, rather than creating a new local variable, which could potentially cause issues later on.
+
+Most Useful Globals
+1. $authordata -> All the available data about the author of the current post.
+2. $post -> The current post object. It holds all information related to the current post and is used by template tags to display post details.
+3. $paged -> Holds the current page number. 
+4. $wp_query -> All the data referring to the default query. It is replaced when using query_posts(), but other functions generally do not alter it.
+5. $wpdb -> Global object to access the database.
+6. $wp_rewrite -> Rewrite the rules applied to the site.
+7. $query_string -> Current query of the page.
+
+*While these globals are useful for theme development, it is important to note that they shouldn't be altered. They are intended for access and debugging purposes only.
+
+--------- Starting a Wordpress Website -----------
+1. Separate the files for each components like header, body, footer
+2. Register and enqueue stylesheets and scripts
+3. Set wp_head() on header.php so all the contents on the header will be executed
+3. Download Plugin - Advanced Custom Fields (ACF), activate, then go to the plugin -> field group. Add field then the field name will be the one we're going to access later via get_field(). To show it on the pages, change location rules setting. 
+
+!!!! Download PHP from Devsense for PHP formatting -> tutorial : https://www.youtube.com/watch?v=HhpuPItGMnk
+
+put this on settings.json if you need the formatter 
+    "[php]": {
+        "editor.defaultFormatter": "DEVSENSE.phptools-vscode"
+    }
+
+---------------- Using Custom Post Types for Advanced Content Management ----------------------
+
+POST
+
+A page is simply another post type, same with elements like attachments, revisions, navigation menus, and custom CSS
+
+Custom Types History 
+
+WP 1.5 (StayHom) -> The only content type that was available was post.
+WP 3.0 (Thelonious) -> The ability to create custome post types.
+Subsequent Releases (2010-2024) -> Refining and enhancing support for custom types.
+
+Support of Custom Types
+
+Wordpress 5.0 & Gutenberg (2018) -> The introduction of Gutenberg block editor in WP 5.0
+B-E Enhancements (2019-present) -> Further enhancements to the block editor
+Customization & Extensibilty (2020-present) -> Improving customization options & extensibility for custom post type
+
+DETERMINING WHEN YOU NEED A CUSTOM POST TYPES
+
+Custom Post Types
+- Content Organization
+- Flexible content grouping
+- Structured content types
+
+When to use?
+- Series of content to be grouped
+- Same format and structure
+- Managed separately from the rest of the content on the site
+
+Setting Up a Custom Post Type
+Functions.php
+- The post type will be unique to the theme
+- Custom templates created specifically for that post type
+
+Plugin
+- The post type will be used across multiple Themes
+- The post type will be set up the same way each time
+
+CREATING AND DISPLAYING CUSTOM POST TYPES
+1. Go to functions.php for the sample codes for displaying custom post types
+2. For generating post types go to this website generatewp.com
+3. For icons go to dashicons in dev wordpress, copy and paste it on the website
+
+-------------- Customize with Hooks, Shortcodes, and Widgets -------------------
+
+MAXIMIZING FUNCTIONALITY WITH Hooks
+
+Adding dynamic content
+- Hooks
+- Shortcodes
+- Widgets
+
+Hooks
+-> Actions - Points in the WP execution process where something happens
+-> Filter - Hooks that manipulate data
+
+Publishing a Post in the Admin
+-> Series of Actions/Filters
+        publish_post(action)
+        save_post(action)
+        wp_insert_post(action)
+        wp_insert_postdata(filter)
+        category_save(filter)
+        content_save_pre(filter)
+        excerpt_save_pre(filter)
+        name_savepre(filter)
+        title_save_pre(filter)
+
+Custom Hooks, Why do you need it?
+->Imagine that most of the actions are related to the theme setup, not from the theme itself. By creating custom hooks, you can set up precise points from within the theme to attach functions specific to the theme. 
+
+**** Check developer.wordpress.org/plugins/hooks for the tutorial.
+
+CREATING CUSTOM ACTION AND FILTER HOOKS
+
+**** Go to functions.php for the custom hooks and filter codes
+
+HARNESSING THE POWER OF SHORTCODES
+
+Shortcodes
+-> actually key-value pairs
+
+The Power of Wordpress
+-> Add dynamic content without Coding
+-> Shortcodes can also be used within widgets
+-> Offer flexibility and ease of use to enhance the interactivity of websites
+
+Naming conventions
+-> Lowercase
+-> Simple word of two
+-> Avoid naming conflicts
+-> Do not use hyphens
+
+***** Go to functions.php for the codes
+
+WIDGETS ABD DYNAMIC SIDEBARS DEMYSTIFIED
+
+The power of wordpress
+-> Easily add and control dynamic content
+-> Every widget has a specific area within the theme
+-> Areas within your theme where widgets can be placed
+
+**** Go to functions.php for the codes
+
+---------------------------------------EXTENDING OUR THEME: CHILD THEMES AND COMMENTS --------------------------------------------
+EXTENDING YOUR THEME
+
+Wordpress development
+1. Child Themes - Add functionality that the main theme doesn't have
+2. Comments - One of the major parts of a blog to interact with the audience
+
+THE WHYS AND WHENS OF THE CHILD THEMES
+
+Why work with Child Themes?
+
+Advantages
+1. Leave the code from the parent theme completely alone.
+2. Add changes or extras to the theme you like to use.
+3. Speed up development and have a secure fallback.
+
+Disadvantages 
+1. A small performance hit.
+2. A learning curve to get up to soeed with how the parent theme works.
+3. Choosing the right parent theme. 
+
+When to use a child Theme?
+
+1. Minor modifications
+2. Quality parent theme
+3. Asses your project scope
+
+COMMENTS
+
+An Overview of Comments in WP
+
+1. Wordpress has always had a built-in functionality for comments.
+2. Comments enable you to interact with the audience on your site.
+3. The file comment.php is responsible for displaying individual comments.
+
+Types of comments
+
+1. Comments - regular comments which users want to add an opinion or discussion point realting to a post on your site.
+2. Pingbacks - a pingback occurs when another blogger has explicitly added a link to your posts on their site.
+3. Trackbacks - a trackback occurs when someone may have written about your site.
+
+DEALING WITH SPAM COMMENTS
+1. Download plugin 'Akismet Anti-spam: Spam Protection'
+2. Settings -> Discussion -> Customize the settings for your choice
+
+UOPGRADING REACT
+
+1. npm install react@latest react-dom@la
+test
+2. npx npm-check-updates -u
+
+--------------------------------------- CUSTOM TAXONOMIES --------------------------------------------
+What are taxonomies?
+
+Introduction
+1. Grouping your content
+2. Five Default Taxonomies
+    - Categories (Hierarchical)
+    - Tags (Multifaceted)
+    - Link Categories
+    - Navigation menus
+    - Post Formats
+3. Two Types of Taxonomies
+    - Multifaceted
+    - Hierarchical (Can be arranged in parent-child relationship)
+
+When do you need taxonomies?
+
+Reasons
+1. Make your content more dynamic
+2. Make your content easy to display
+3. Incorporate them with custom post types
+
+Creating Taxonomies (eg. Movies)
+
+Classify Movies
+1. Genres - Category
+2. Directors - Category
+3. Film Studios - Category
+4. Actors - Tag
+5. Writers 
+
+Custom Taxonomies
+
+Naming conventions
+- All names should be in lowercase
+- No spaces and fewer than 32 characters
+- Be careful of conflict wordpress
+- use prefix eg. mv_genres mv_actors
+
+--------------------------------------- PLUGINS: WHEN THE TIME IS RIGHT --------------------------------------------
+
+When to use plugins?
+
+Plugin vs Theme Functions
+
+Things to Consider
+1. Is the feature you're creating, specific to the theme you're working on?
+2. Could this feature be usefull across multiple sites or themes?
+3. Will the functionality be needed across a site and not just for a Theme?
+4. Are you planning to distribute your theme or use it for your own site?
+
+Plugin Development
+1. Build universal functionality
+2. Develop standalone functionality
+3. Keep Content Types Modular
+
+Theme Functions
+1. Theme-specific functionality
+2. Static Theme-Specific Features
+3. Planning Theme Functionality Distribution
+
+**** Avoid Rewriting Wordpress Core Functionality ****
+
+Plugin Development
+- Never replicate a functionality already provided in WP
+ex. gallery plugins, pagination
+- Never add a plugin for something you can easily reproduce
+
+**** Avoid Plugin Realiance on Core Functionality in Theme Design ****
+
+Plugin Developer
+1. Ensure security of the code/functionality
+2. Provide clean and well-structured HTML
+3. Provide support and good documentation
+4. Keep regular updates to coincide with core Wordpress updates
+
+**** Theme Compatibility with External Plugins ****
+
+Main things you should be aware of
+- Naming conventions
+- Hooks
+- Dynamic Sidebars
+
+Criteria for Plugin Selections
+
+Series of steps
+1. A note on Testing
+2. WP Plugin Directory
+3. Ratings
+4. Authors
+5. Compatibility
+6. Support and documentation
+7. Compatibility with other plugins
+
+Beneficial Plugins for Wordpress Development
+
+Site Management Plugins
+1. Advanced Custom Fields (ACF)
+2. Akismet (Anti Spam)
+3. WPML 
+
+Form Management Plugins
+1. Contact Form 7
+
+SEO Plugins
+1. All in One SEO Pack
+2. Yoast SEO
+
+Performance and Security
+1. Jetpack
+
+--------------------------------------- SECURITY AND PERFORMANCE OPTIMIZATION --------------------------------------------
+
+**** Backing up Wordpress like a pro ****
+
+Wordpress Security
+Core elements
+Database -> Themes -> Uploads Directory
+
+Several ways
+- Using manual backups (downloading sql files)
+- Using plugin (BackupBuddy, WP DB Manager)
+- Infinite WP
+
+**** Actions, Permissions, and Intent ****
+
+Theme Security
+
+Important Security information
+- Actions
+- Permissions
+- Intent
+
+Nonce - a 'number used once' to help protect URLs and forms from certain types of misuse, malicious or otherwise
+
+**** Securing the Wordpress Login ****
+
+Secure Login Techniques
+1. Never use "Admin" as username
+2. Limit login attempts (Use plugin: Limit Login Attempts Reloaded)
+3. Preventing the Default Error Message (Use: 'Incorrect username or password') see functions.php
+4. Securing your login page with SSL
+- SSL are included in hosting providers
+- Then include these codes on your wp-config.php file
+
+// Require SSL for all Admin Sessions
+define('FORCE_SSL_ADMIN', true);
+// Require SSL for Login page
+define('FORCE_SSL_LOGIN', true);
+
+**** General Wordpress Security ****
+
+Best Security Tips
+- Staying up to date
+- Hiding unnecessary data
+    eg. tags that reveal your wordpress version, include this on your functions.php
+
+    remove_action('wp_head', 'rsd_link');
+    remove_action('wp_head', 'wp_generator');
+    remove_action('wp_head', 'wlwmanifest_link');
+
+- File security & permissions
+- Blocking File access
+    If you manage your own server, consider eliminating the htaccess file from your site directory entirely.
+    Instead, move its contents to the main server configuration file.
+- Protecting Directory Access
+    Use htaccess file to disable directory access 
+    Search for the simple htaccess directive to disable indexing
+- The install.php file ( delete this once setup is complete ) or use htaccess to disable it
+
+Here's a sample of .htaccess
+
+---- Start Here ----
+Options -Indexes
+# BEGIN Wordpress
+# The directives (lines) between "BEGIN WORDPRESS" and "END WORDPRESS" are
+# dynamically generated, and should only be modified via Wordpress filters. 
+# Any changes to the directives between those markers will be overwritten.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteBase /wordpress/
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /wordpress/index.php [L]
+</IfModule>
+
+<Files wp-config.php>
+order allow, deny
+deny from all
+</Files>
+<Files .htaccess>
+order allow, deny
+deny from all
+</Files>
+<Files install.php>
+order allow, deny
+deny from all
+</Files>
+
+---- End Here ----
+
+Best Security Tips 
+
+Database Security
+    1. Change the table name from 'wp_' which is the usual to something line 'src_' then change the $table_prefix in wp-config.php
+    2. Run this query on src_usermeta incase there's an error on the wpadmin site
+
+        UPDATE src_usermeta SET meta_key = REPLACE(meta_key, 'wp', 'src');
+
+    3. If there's still error, do the same thing with src_options
+
+        UPDATE src_usermeta SET meta_key = REPLACE(option_name, 'wp', 'src');
+
+Relocating Files and Directories ( Avoid predictability )
+    Moving the wp-config.php file
+    Relocating the Wordpress Core Files
+    Moving the wp-content Directory
+
+Never use root user (Database)
+    Create a new database user for each website, along with a standalone database that only that user has permissions for.
+    You just need to create a new user and select the create database with same name and grant all privileges option.
+
+Other Security Tips
+1.Preventing Script Injections (in .htacess)
+
+    # Security: Bloack access to GLOBALS and \_REQUEST variables
+
+    Options +FollowSymLinks
+
+    RewriteEninge On
+    RewriteCond %{QUERY*STRING} (\<|%3C).\_script.*(\>|%3E) [NC, OR]
+    RewriteCond %{QUERY_STRING} ^GLOBALS(=|\[|\%[0-9A-F]{2}) [NC]
+    RewriteCond %{QUERY_STRING} ^_REQUEST(=|\[|\%[0-9A-F]{2}) [NC]
+    RewriteRule ^(.\*)$ index.php [F, L]
+
+2. Preventing Hot-linking
+
+    # Prevent Hot-linking
+    RewriteEngine On
+    # Replace website\.com with your site url
+    RewriteCond %{HTTP_REFERER} !^https?://(www\.)?yourwebsite\.com/ [NC]
+    RewriteCond %{HTTP_REFERER} !^$
+    # Replace image with your "stealing is bad" image URL
+    RewriteRule .*\.(jpg|jpeg|png|gif|webp|bmp)$ images/stealingisbad.gif [L]
+
+3. Monitoring Security
+
+    Tools: Acunetix WP Security, OSSEC, 
+
+**** Performance Monitoring for Wordpress ****
+
+Testing Performance
+1. Benchmark to test again
+2. Google Page Speed
+3. Google Analytics
+
+Performance Techniques
+
+Best Performance Tips
+1. Hosting 
+    - Avoid cheap hosting
+    - Virtual host may be a good option
+    - Dedicated virtual machine
+2. Building your themes responsibly
+    - Compress CSS and JS files
+    - Optimizing images (ImageOptim, CodeKit)
+3. Compressing and browser caching
+    - Setting up file compression on your server (.htaccess)
+    - Exploiting .htacess
+        HTML5 boiler plate for compression and browser caching
+4. Creating a static domain for content 
+    - Enhance browser parallelization
+    - Content delivery networks
+    - Increase launch Speed
+
+        in wp.config File
+        // Set a different content domain from inside the Wordpress configuration file
+        define('WP_CONTENT_URL', 'http://assets.yourwebsite.com');
+        define('COOKIE_DOMAIN', ;http://yourwebsite.com');
+
+5. Database Maintenance
+    - Keepin a regular eye on your database
+    - Optimizing your database
+    - Keeping it backed up
+    free plugins: wpoptimize, db Manager
+
+6. Caching
+    - Efficient content delivery
+    - Speed up your websites using plugins
+    - W3 Total Cache, WP Super Cache (Plugins)
